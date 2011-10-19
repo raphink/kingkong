@@ -13,7 +13,7 @@ use constant CONFNAME => "kingkong.conf";
 sub usage() {
    print "$0 <conffile|dir> [<conffile|dir>...]
 
- == KINGKONG Is Not a Genuine Konfiguration Generator ==
+ == KINGKONG Is Not a Genuine KONfiguration Generator ==
 
  Generate files from a YAML configuration file.
 
