@@ -26,4 +26,6 @@ KingKong requires the following Perl modules:
   - YAML
   - Template
   - Hash::Merge
+  - Getopt::Long
+  - File::Basename
 
