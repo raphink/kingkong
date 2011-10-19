@@ -1,10 +1,10 @@
-Ging Is Not Genconf
-===================
+KINGKONG Is Not a Genuine Konfiguration Generator
+=================================================
 
  Generate files from a YAML configuration file.
 
  Each parameter can be either a file or a directory.
- When a directory is passed, the file ging.conf
+ When a directory is passed, the file kingkong.conf
  will be searched within this directory.
 
  The YAML file must contain at least a 'templates'
@@ -16,4 +16,3 @@ Ging Is Not Genconf
  All values in the YAML file are passed to the
  template to generate the file, using the Template
  Perl module.
-
