@@ -16,3 +16,14 @@ KINGKONG Is Not a Genuine KONfiguration Generator
  All values in the YAML file are passed to the
  template to generate the file, using the Template
  Perl module.
+
+
+Requirements
+============
+
+KingKong requires the following Perl modules:
+
+  - YAML
+  - Template
+  - Hash::Merge
+

@@ -7,6 +7,8 @@ use strict;
 use Template;
 use YAML;
 use Hash::Merge qw( merge );
+use Getopt::Long;
+use File::Basename;
 
 use constant CONFNAME => "kingkong.conf";
 
@@ -34,9 +36,17 @@ sub usage() {
 }
 
 
-my @conffiles = @ARGV;
+# Process options
+my $help = 0;
+my $opts = GetOptions(
+   'help|?'     => \$help,
+);
 
-usage() and exit(0) unless ($#conffiles >= 0);
+usage() and exit(0) if $help;
+
+# Process arguments
+my @conffiles = @ARGV;
+@conffiles = ('.') unless ($#conffiles >= 0);
 
 foreach my $conffile (@conffiles) {
    $conffile = "$conffile/".CONFNAME if (-d $conffile);
@@ -44,8 +54,7 @@ foreach my $conffile (@conffiles) {
    my $conf = YAML::LoadFile($conffile);
    
    # Use conf path to generate files
-   my $dirname = readlink $conffile || $conffile;
-   $dirname =~ s|/[^/]+$||;
+   my $dirname = dirname($conffile);
 
    # Manage includes
    if ($conf->{include}) {
@@ -63,14 +72,15 @@ foreach my $conffile (@conffiles) {
    $conf->{program} = $0;
    $conf->{conffile} = $conffile;
    
-   my $template = new Template;
+   my $template = new Template(RELATIVE => 1, ABSOLUTE => 1);
    my $tmpl_ext = $conf->{template_extension};
    $tmpl_ext ||= "tmpl";
    
    foreach my $file (@{$conf->{templates}}) {
       my $tmpl = "$file.$tmpl_ext";
       print "Generating $dirname/$file from $dirname/$tmpl\n";
-      $template->process("$dirname/$tmpl", $conf, "$dirname/$file");
+      $template->process("$dirname/$tmpl", $conf, "$dirname/$file")
+         || die $template->error();
    }
 }
 
