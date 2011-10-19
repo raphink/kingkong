@@ -8,12 +8,12 @@ use Template;
 use YAML;
 use Hash::Merge qw( merge );
 
-use constant CONFNAME => "ging.conf";
+use constant CONFNAME => "kingkong.conf";
 
 sub usage() {
    print "$0 <conffile|dir> [<conffile|dir>...]
 
- == Ging Is Not Genconf ==
+ == KINGKONG Is Not a Genuine Konfiguration Generator ==
 
  Generate files from a YAML configuration file.
 
