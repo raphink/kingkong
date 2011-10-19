@@ -1,0 +1,19 @@
+Ging Is Not Genconf
+===================
+
+ Generate files from a YAML configuration file.
+
+ Each parameter can be either a file or a directory.
+ When a directory is passed, the file ging.conf
+ will be searched within this directory.
+
+ The YAML file must contain at least a 'templates'
+ array with the name of the files to generate.
+
+ Optionally, it can contain a 'template_extension'
+ variable, which defaults to 'tmpl'.
+
+ All values in the YAML file are passed to the
+ template to generate the file, using the Template
+ Perl module.
+

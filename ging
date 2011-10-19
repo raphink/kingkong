@@ -1,0 +1,76 @@
+#!/usr/bin/perl -w
+#
+# Generate files from a YAML configuration file
+#
+
+use strict;
+use Template;
+use YAML;
+use Hash::Merge qw( merge );
+
+use constant CONFNAME => "ging.conf";
+
+sub usage() {
+   print "$0 <conffile|dir> [<conffile|dir>...]
+
+ == Ging Is Not Genconf ==
+
+ Generate files from a YAML configuration file.
+
+ Each parameter can be either a file or a directory.
+ When a directory is passed, the file ".CONFNAME."
+ will be searched within this directory.
+
+ The YAML file must contain at least a 'templates'
+ array with the name of the files to generate.
+
+ Optionally, it can contain a 'template_extension'
+ variable, which defaults to 'tmpl'.
+
+ All values in the YAML file are passed to the
+ template to generate the file, using the Template
+ Perl module.
+";
+}
+
+
+my @conffiles = @ARGV;
+
+usage() and exit(0) unless ($#conffiles >= 0);
+
+foreach my $conffile (@conffiles) {
+   $conffile = "$conffile/".CONFNAME if (-d $conffile);
+
+   my $conf = YAML::LoadFile($conffile);
+   
+   # Use conf path to generate files
+   my $dirname = readlink $conffile || $conffile;
+   $dirname =~ s|/[^/]+$||;
+
+   # Manage includes
+   if ($conf->{include}) {
+      Hash::Merge::set_behavior( 'RIGHT_PRECEDENT' );
+      foreach my $include (@{$conf->{include}}) {
+         print "Including $dirname/$include\n";
+         my $yaml = YAML::LoadFile("$dirname/$include");
+         $conf = merge($conf, $yaml);
+      }
+   }
+
+   #print YAML::Dump( $conf );
+
+   # Add info we need
+   $conf->{program} = $0;
+   $conf->{conffile} = $conffile;
+   
+   my $template = new Template;
+   my $tmpl_ext = $conf->{template_extension};
+   $tmpl_ext ||= "tmpl";
+   
+   foreach my $file (@{$conf->{templates}}) {
+      my $tmpl = "$file.$tmpl_ext";
+      print "Generating $dirname/$file from $dirname/$tmpl\n";
+      $template->process("$dirname/$tmpl", $conf, "$dirname/$file");
+   }
+}
+
