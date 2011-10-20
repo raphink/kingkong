@@ -15,7 +15,7 @@ use constant VERSION => "0.1";
 
 sub usage() {
    print "KingKong v".VERSION."\n";
-   print "Usage: $0 <conffile|dir> [<conffile|dir>...]
+   print "Usage: $0 [-h|--help|-?][-v|--verbose][-p|--print] <conffile|dir> [<conffile|dir>...]
 
  == KINGKONG Is Not a Genuine KONfiguration Generator ==
 
@@ -35,9 +35,9 @@ sub usage() {
    |[][][]|        template to generate the file, using the Template
    |[][][]|        Perl module.
    |[][][]|
-   |[|--|]|
-   |[|  |]|
-   ======== 
+   |[|--|]|        In print mode (option --print), KingKong dumps
+   |[|  |]|        the full YAML conf as generated with the includes
+   ========        but doesn't process it.
   ==========
   |[[    ]]|
   ==========   
@@ -47,8 +47,12 @@ sub usage() {
 
 # Process options
 my $help = 0;
+my $print = 0;
+my $verbose = 0;
 my $opts = GetOptions(
    'help|?'     => \$help,
+   'print'      => \$print,
+   'verbose'    => \$verbose,
 );
 
 usage() and exit(0) if $help;
@@ -69,13 +73,17 @@ foreach my $conffile (@conffiles) {
    if ($conf->{include}) {
       Hash::Merge::set_behavior( 'RIGHT_PRECEDENT' );
       foreach my $include (@{$conf->{include}}) {
-         print "Including $dirname/$include\n";
+         print "V: Including $dirname/$include\n" if $verbose;
          my $yaml = YAML::LoadFile("$dirname/$include");
          $conf = merge($conf, $yaml);
       }
+      delete($conf->{include});
    }
 
-   #print YAML::Dump( $conf );
+   if ($print) {
+      print YAML::Dump( $conf );
+      next;
+   }
 
    # Add info we need
    $conf->{program} = $0;
@@ -87,7 +95,7 @@ foreach my $conffile (@conffiles) {
    
    foreach my $file (@{$conf->{templates}}) {
       my $tmpl = "$file.$tmpl_ext";
-      print "Generating $dirname/$file from $dirname/$tmpl\n";
+      print "V: Generating $dirname/$file from $dirname/$tmpl\n" if $verbose;
       $template->process("$dirname/$tmpl", $conf, "$dirname/$file")
          || die $template->error();
    }
