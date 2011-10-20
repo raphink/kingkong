@@ -11,9 +11,11 @@ use Getopt::Long;
 use File::Basename;
 
 use constant CONFNAME => "kingkong.conf";
+use constant VERSION => "0.1";
 
 sub usage() {
-   print "$0 <conffile|dir> [<conffile|dir>...]
+   print "KingKong v".VERSION."\n";
+   print "Usage: $0 <conffile|dir> [<conffile|dir>...]
 
  == KINGKONG Is Not a Genuine KONfiguration Generator ==
 
