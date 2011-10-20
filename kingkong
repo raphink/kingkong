@@ -49,10 +49,12 @@ sub usage() {
 my $help = 0;
 my $print = 0;
 my $verbose = 0;
+my $includedir = '';
 my $opts = GetOptions(
-   'help|?'     => \$help,
-   'print'      => \$print,
-   'verbose'    => \$verbose,
+   'help|?'        => \$help,
+   'print'         => \$print,
+   'verbose'       => \$verbose,
+   'includedir=s'  => \$includedir,
 );
 
 usage() and exit(0) if $help;
@@ -60,6 +62,16 @@ usage() and exit(0) if $help;
 # Process arguments
 my @conffiles = @ARGV;
 @conffiles = ('.') unless ($#conffiles >= 0);
+
+
+sub include_conf {
+   my ($conf, $include) = @_;
+
+   print "V: Including $include\n" if $verbose;
+   my $yaml = YAML::LoadFile("$include");
+   return merge($conf, $yaml);
+}
+
 
 foreach my $conffile (@conffiles) {
    $conffile = "$conffile/".CONFNAME if (-d $conffile);
@@ -73,9 +85,13 @@ foreach my $conffile (@conffiles) {
    if ($conf->{include}) {
       Hash::Merge::set_behavior( 'RIGHT_PRECEDENT' );
       foreach my $include (@{$conf->{include}}) {
-         print "V: Including $dirname/$include\n" if $verbose;
-         my $yaml = YAML::LoadFile("$dirname/$include");
-         $conf = merge($conf, $yaml);
+         if (-e "$dirname/$include") {
+            $conf = include_conf($conf, "$dirname/$include");
+         } elsif ($includedir && -e "$includedir/$include") {
+            $conf = include_conf($conf, "$includedir/$include");
+         } else {
+            die "E: Could not find include file $include";
+         }
       }
       delete($conf->{include});
    }
@@ -89,14 +105,18 @@ foreach my $conffile (@conffiles) {
    $conf->{program} = $0;
    $conf->{conffile} = $conffile;
    
-   my $template = new Template(RELATIVE => 1, ABSOLUTE => 1);
+   my $template = new Template(
+      RELATIVE => 1,
+      ABSOLUTE => 1,
+      INCLUDE_PATH => "$dirname:$includedir",
+      );
    my $tmpl_ext = $conf->{template_extension};
    $tmpl_ext ||= "tmpl";
    
    foreach my $file (@{$conf->{templates}}) {
       my $tmpl = "$file.$tmpl_ext";
       print "V: Generating $dirname/$file from $dirname/$tmpl\n" if $verbose;
-      $template->process("$dirname/$tmpl", $conf, "$dirname/$file")
+      $template->process("$tmpl", $conf, "$dirname/$file")
          || die $template->error();
    }
 }
