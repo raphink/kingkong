@@ -5,7 +5,7 @@
 # Authors:
 #   Raphaël Pinson <raphink@gmail.com>
 #   Mathieu Alorent <github@kumy.net>
-#        
+#
 # Copyright (C) 2011 Raphaël Pinson
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -103,7 +103,8 @@ foreach my $conffile (@conffiles) {
    # Manage includes
    if ($conf->{include}) {
       Hash::Merge::set_behavior( 'RIGHT_PRECEDENT' );
-      foreach my $include (@{$conf->{include}}) {
+      while ($#{$conf->{include}} >= 0) {
+         my $include = shift @{$conf->{include}};
          if (-e "$dirname/$include") {
             $conf = include_conf($conf, "$dirname/$include");
          } elsif ($includedir && -e "$includedir/$include") {
