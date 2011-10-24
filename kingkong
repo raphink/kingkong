@@ -133,8 +133,15 @@ foreach my $conffile (@conffiles) {
    my $tmpl_ext = $conf->{template_extension};
    $tmpl_ext ||= "tmpl";
    
-   foreach my $file (@{$conf->{templates}}) {
-      my $tmpl = "$file.$tmpl_ext";
+   foreach my $entry (@{$conf->{templates}}) {
+      my $file = $entry;
+      my $tmpl;
+      if(ref($entry) eq "HASH") {
+         my @keys = keys %$entry;
+         $file = $keys[0];
+         $tmpl = $entry->{$file};
+      }
+      $tmpl ||= "$file.$tmpl_ext";
       print "V: Generating $dirname/$file from $dirname/$tmpl\n" if $verbose;
       $template->process("$tmpl", $conf, "$dirname/$file")
          || die $template->error();
