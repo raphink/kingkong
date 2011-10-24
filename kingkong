@@ -34,9 +34,11 @@ use constant VERSION => "0.1";
 
 sub usage() {
    print "KingKong v".VERSION."\n";
-   print "Usage: $0 [-h|--help|-?][-v|--verbose][-p|--print] <conffile|dir> [<conffile|dir>...]
+   print "Usage: $0 [-h|--help|-?][-v|--verbose][-p|--print]
+       [-i|--includedir <include_dir>] [-i|--includedir <include_dir>]...
+       <conffile|dir> [<conffile|dir>...]
 
- == KINGKONG Is Not a Genuine KONfiguration Generator ==
+ == KingKong Is Not a Genuine KONfiguration Generator ==
 
       <> ( oo )    Generate files from a YAML configuration file.
       <>_| ^^ |_ 
@@ -58,8 +60,10 @@ sub usage() {
    |[|  |]|        the full YAML conf as generated with the includes
    ========        but doesn't process it.
   ==========
-  |[[    ]]|
-  ==========   
+  |[[    ]]|       The templates and included configuration files
+  ==========       are taken from the inclusion path, which contains
+                   only the working directory by default. You can add
+                   to the include path by using the --includedir option.
 ";
 }
 
@@ -68,12 +72,12 @@ sub usage() {
 my $help = 0;
 my $print = 0;
 my $verbose = 0;
-my $includedir = '';
+my @includedirs = [];
 my $opts = GetOptions(
    'help|?'        => \$help,
    'print'         => \$print,
    'verbose'       => \$verbose,
-   'includedir=s'  => \$includedir,
+   'includedir=s'  => \@includedirs,
 );
 
 usage() and exit(0) if $help;
@@ -104,14 +108,21 @@ foreach my $conffile (@conffiles) {
    if ($conf->{include}) {
       Hash::Merge::set_behavior( 'RIGHT_PRECEDENT' );
       while ($#{$conf->{include}} >= 0) {
+         my $include_found = 0;
          my $include = shift @{$conf->{include}};
          if (-e "$dirname/$include") {
+            $include_found = 1;
             $conf = include_conf($conf, "$dirname/$include");
-         } elsif ($includedir && -e "$includedir/$include") {
-            $conf = include_conf($conf, "$includedir/$include");
-         } else {
-            die "E: Could not find include file $include";
+         } elsif ($#includedirs >= 0) {
+            foreach my $includedir (@includedirs) {
+               if (-e "$includedir/$include") {
+                  $include_found = 1;
+                  $conf = include_conf($conf, "$includedir/$include");
+               }
+            }
          }
+         die "E: Could not find include file $include"
+           unless ($include_found);
       }
       delete($conf->{include});
    }
@@ -128,7 +139,7 @@ foreach my $conffile (@conffiles) {
    my $template = new Template(
       RELATIVE => 1,
       ABSOLUTE => 1,
-      INCLUDE_PATH => "$dirname:$includedir",
+      INCLUDE_PATH => "$dirname:".join(":", @includedirs),
       );
    my $tmpl_ext = $conf->{template_extension};
    $tmpl_ext ||= "tmpl";
