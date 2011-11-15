@@ -28,6 +28,7 @@ use YAML;
 use Hash::Merge qw( merge );
 use Getopt::Long;
 use File::Basename;
+use Config::KingKong::File;
 
 use constant CONFNAME => "kingkong.conf";
 use constant VERSION => "0.1";
@@ -151,11 +152,21 @@ foreach my $conffile (@conffiles) {
          my @keys = keys %$entry;
          $file = $keys[0];
          $tmpl = $entry->{$file};
+      } elsif ($entry =~ m|([^: \t]+)\s*:\s*([^: \t]+)|) {
+         # YAML doesn't understand hash with $ and {} in keys
+         $file = $1;
+         $tmpl = $2;
       }
-      $tmpl ||= "$file.$tmpl_ext";
-      print "V: Generating $dirname/$file from $dirname/$tmpl\n" if $verbose;
-      $template->process("$tmpl", $conf, "$dirname/$file")
-         || die $template->error();
+      my $target = Config::KingKong::File->new(
+         'engine'      => $template,
+         'directory'   => $dirname,
+         'target'      => $file,
+         'template'    => $tmpl,
+         'environment' => $conf,
+         'template_extension' => $tmpl_ext,
+         'verbose'     => $verbose,
+      );
+      $target->process();
    }
 }
 
