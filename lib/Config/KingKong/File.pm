@@ -90,7 +90,7 @@ sub generate {
    $tmpl ||= "$file.$tmpl_ext";
    my $dirname = $self->{directory};
    print "V: Generating $dirname/$file from $dirname/$tmpl\n" if $self->{verbose};
-   $self->{engine}->process($tmpl, $self->{environment}, "$dirname/$file")
+   $self->{engine}->process($tmpl, $self->{environment}, $file)
          || die $self->{engine}->error();
 }
 

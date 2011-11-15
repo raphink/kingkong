@@ -141,6 +141,7 @@ foreach my $conffile (@conffiles) {
       RELATIVE => 1,
       ABSOLUTE => 1,
       INCLUDE_PATH => "$dirname:".join(":", @includedirs),
+      OUTPUT_PATH => $dirname,
       );
    my $tmpl_ext = $conf->{template_extension};
    $tmpl_ext ||= "tmpl";
