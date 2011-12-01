@@ -31,10 +31,9 @@ use File::Basename;
 use Config::KingKong::File;
 
 use constant CONFNAME => "kingkong.conf";
-use constant VERSION => "0.1";
 
 sub usage() {
-   print "KingKong v".VERSION."\n";
+   print "KingKong v".$Config::KingKong::VERSION."\n";
    print "Usage: $0 [-h|--help|-?][-v|--verbose][-p|--print]
        [-i|--includedir <include_dir>] [-i|--includedir <include_dir>]...
        <conffile|dir> [<conffile|dir>...]
