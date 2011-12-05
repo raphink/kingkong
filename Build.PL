@@ -26,11 +26,12 @@ my $builder = Module::Build->new(
     dist_author => 'Raphaël Pinson <raphink@cpan.org>',
     dist_abstract => 'KingKong Is Not a Genuine KONfiguration Generator',
     requires    => {
-        'Template'       => 0,
-        'YAML'           => 0,
-        'Hash::Merge'    => 0,
-        'Getopt::Long'   => 0,
-        'File::Basename' => 0,
+        'Class::Accessor' => 0,
+        'Template'        => 0,
+        'YAML'            => 0,
+        'Hash::Merge'     => 0,
+        'Getopt::Long'    => 0,
+        'File::Basename'  => 0,
     },
     build_requires => {
         'Test::More'      => 0,
