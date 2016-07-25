@@ -42,7 +42,7 @@ sub new {
 sub process {
    my ($self) = @_;
 
-   my @matches = $self->{target} =~ /\${(\w+)}/g;
+   my @matches = $self->{target} =~ /\$\{(\w+)\}/g;
    $self->{file_vars} = \@matches;
    if ($#matches >= 0) {
       $self->recurse_file(0);
